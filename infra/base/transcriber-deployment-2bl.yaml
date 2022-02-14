@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcriber-2bl
+  labels:
+    app: radio-monitor
+    component: transcriber
+    station: 2bl
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: transcriber
+      station: 2bl
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: transcriber
+        station: 2bl
+    spec:
+      initContainers:
+      - name: create-sub-dirs
+        image: busybox:stable
+        command: ['sh', '-c', 'mkdir -p /mnt/transcript/2BL:ffmpeg:deepspeech-0.9.3']
+        volumeMounts:
+        - name: transcript-blobs
+          mountPath: /mnt/transcript
+      containers:
+      - name: transcriber-deepspeech
+        image: eliiza.azurecr.io/radio-monitor:2.2.0-deepspeech_0.9.3
+        env:
+        - name: AUDIO_DIRECTORY
+          value: /mnt/audio
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/transcript
+        - name: DEEPSPEECH_TFLITE
+          value: "true"
+        args:
+        - transcribe
+        - deepspeech
+        - --input=fs
+        - --output=fs
+        - --sources=2BL:ffmpeg
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 750Mi
+          limits:
+            cpu: 1000m
+            # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
+            memory: 1000Mi
+        volumeMounts:
+        - name: audio-blobs
+          mountPath: /mnt/audio
+        - name: transcript-blobs
+          mountPath: /mnt/transcript
+      volumes:
+      - name: audio-blobs
+        persistentVolumeClaim:
+          claimName: audio-blobs
+      - name: transcript-blobs
+        persistentVolumeClaim:
+          claimName: transcript-blobs
+      # - name: gcp-service-account
+      #   secret:
+      #     secretName: radio-monitor-secrets
+      #     items:
+      #     - key: gcpServiceAccountJson
+      #       path: gcp-radio-streaming.json

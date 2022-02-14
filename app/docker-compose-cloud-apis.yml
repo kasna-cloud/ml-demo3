@@ -1,0 +1,160 @@
+version: '3'
+services:
+    # transcribe-deepspeech:
+    #     environment:
+    #         S3_BUCKET: lucas-radio-streaming
+    #         AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+    #         AWS_SECRET_ACCESS_KEY: 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
+    #     image: eliiza/radio-deepspeech:1.2.1_0.7.3
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 memory: 2GB
+    #     command: transcribe deepspeech --input=s3 --output=s3 --sources=3LO:ffmpeg,3AW:ffmpeg
+    transcribe-aws:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            AUDIO_SOURCES: 3LO:ffmpeg,3AW:ffmpeg
+            AWS_TRANSCRIBE_PENDING_BUCKET: lucas-radio-streaming-transcriptions
+        image: eliiza/radio-base:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: transcribe-with-aws-transcribe
+    transcribe-gcp:
+        volumes:
+            - ~/keys:/root/keys
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            GOOGLE_APPLICATION_CREDENTIALS: /root/keys/gcp-radio-streaming.json
+            AUDIO_SOURCES: 3LO:ffmpeg,3AW:ffmpeg
+        image: eliiza/radio-gcpsdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: transcribe-with-gcp-speech-to-text
+    transcribe-azure:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            AZURE_SUBSCRIPTION_KEY: 8e359ac5d5d345deac9c1a851164a406
+            AUDIO_SOURCES: 3LO:ffmpeg,3AW:ffmpeg
+        image: eliiza/radio-azuresdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: transcribe-with-azure-speech-to-text
+    analyse-sentiment-aws:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-base:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-sentiment-with-aws-comprehend
+    analyse-sentiment-gcp:
+        volumes:
+            - ~/keys:/root/keys
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            GOOGLE_APPLICATION_CREDENTIALS: /root/keys/gcp-radio-streaming.json
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-gcpsdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-sentiment-with-gcp-language
+    analyse-sentiment-azure:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            AZURE_TEXT_ANALYTICS_ENDPOINT: https://australiaeast.api.cognitive.microsoft.com/
+            AZURE_TEXT_ANALYTICS_KEY: 8e359ac5d5d345deac9c1a851164a406
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-azuresdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-sentiment-with-azure-text-analytics
+    analyse-mentions-aws:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-base:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-mentions-with-aws-comprehend
+    analyse-mentions-gcp:
+        volumes:
+            - ~/keys:/root/keys
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            GOOGLE_APPLICATION_CREDENTIALS: /root/keys/gcp-radio-streaming.json
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-gcpsdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-mentions-with-gcp-language
+    analyse-mentions-azure:
+        environment:
+            S3_BUCKET: lucas-radio-streaming
+            AWS_ACCESS_KEY_ID: AKIAZJBU4EUF5VNMYAIB
+            AWS_SECRET_ACCESS_KEY: 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
+            AZURE_TEXT_ANALYTICS_ENDPOINT: https://australiaeast.api.cognitive.microsoft.com/
+            AZURE_TEXT_ANALYTICS_KEY: 8e359ac5d5d345deac9c1a851164a406
+            POSTGRESQL_HOST: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
+            POSTGRESQL_DATABASE: radioanalysis
+            POSTGRESQL_USERNAME: radiostream
+            POSTGRESQL_PASSWORD: u7oa6gYAYZJ9tCMJodj7sxvLEF35EB
+            TRANSCRIPT_SOURCES: 3LO:ffmpeg:deepspeech-0.7.1,3AW:ffmpeg:deepspeech-0.7.1,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        image: eliiza/radio-azuresdk:1.2.1
+        deploy:
+            resources:
+                limits:
+                    memory: 1GB
+        command: analyse-mentions-with-azure-text-analytics

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-analyser
+  labels:
+    app: radio-monitor
+    component: sentiment-analyser
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: sentiment-analyser
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: sentiment-analyser
+    spec:
+      containers:
+      - name: sentiment-analyser-naturaljs
+        image: eliiza.azurecr.io/radio-monitor:2.2.0-base
+        env:
+        - name: POSTGRESQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: radio-monitor-config-cm
+              key: postgresHost
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: radio-monitor-config-cm
+              key: postgresDatabase
+        - name: POSTGRESQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresUsername
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresPassword
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/transcript
+        args:
+        - analyse-sentiment
+        - naturaljs
+        - --input=fs
+        - --output=postgres
+        - --sources=3LO:ffmpeg:deepspeech-0.9.3,2BL:ffmpeg:deepspeech-0.9.3,3LO:ffmpeg:deepspeech-0.7.3,2BL:ffmpeg:deepspeech-0.7.3
+        # ,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
+        resources:
+          requests:
+            cpu: 100m
+            memory: 800Mi
+          limits:
+            cpu: 200m
+            # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
+            memory: 1000Mi
+        volumeMounts:
+        - name: transcript-blobs
+          mountPath: /mnt/transcript
+      volumes:
+      - name: transcript-blobs
+        persistentVolumeClaim:
+          claimName: transcript-blobs

@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: audio-blobs
+  labels:
+    app: radio-monitor
+    component: storage
+provisioner: blob.csi.azure.com
+parameters:
+  resourceGroup: radio-monitor
+  storageAccount: radiomonitor  # cross subscription is not supported
+  containerName: audio
+reclaimPolicy: Retain  # If set as "Delete" container would be removed after pvc deletion
+volumeBindingMode: Immediate
