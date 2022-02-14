@@ -4,5 +4,5 @@ metadata:
   name: radio-monitor-config-cm
 data:
   s3Bucket: lucas-radio-streaming
-  postgresHost: lucas-radio-streaming.czyr5fsmnye2.ap-southeast-2.rds.amazonaws.com
-  postgresDatabase: radioanalysis
+  postgresHost:  radio-monitor
+  postgresDatabase: radio-monitor 

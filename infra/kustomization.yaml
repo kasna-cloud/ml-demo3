@@ -9,7 +9,7 @@ resources:
 - base/storage-audio-storageclass.yaml
 - base/storage-transcript-pvc.yaml
 - base/storage-transcript-storageclass.yaml
-- base/transcriber-deployment-3lo.yaml
+#- base/transcriber-deployment-3lo.yaml
 # Disable one of the transcribers for cost saving:
 # - base/transcriber-deployment-2bl.yaml
 
