@@ -12,8 +12,8 @@
 
 	"containerEnv": {
 		"S3_BUCKET": "lucas-radio-streaming-transcriptions",
-		"AWS_ACCESS_KEY_ID": "AKIAZJBU4EUF5VNMYAIB",
-		"AWS_SECRET_ACCESS_KEY": "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"
+		"AWS_ACCESS_KEY_ID": "",
+		"AWS_SECRET_ACCESS_KEY": ""
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
