@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: sentiment-analyser-naturaljs
-        image: eliiza.azurecr.io/radio-monitor:2.2.0-base
+        image: gcr.io/PROJECT_ID/radio-monitor:latest-base
         env:
         - name: POSTGRESQL_HOST
           valueFrom:
@@ -47,7 +47,7 @@ spec:
         - naturaljs
         - --input=fs
         - --output=postgres
-        - --sources=3LO:ffmpeg:deepspeech-0.9.3,2BL:ffmpeg:deepspeech-0.9.3,3LO:ffmpeg:deepspeech-0.7.3,2BL:ffmpeg:deepspeech-0.7.3
+        - --sources=3LO:ffmpeg:gcpspeechtotext
         # ,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
         resources:
           requests:
