@@ -1,5 +1,5 @@
 const processes = ['transcribe', 'analyse-sentiment', 'analyse-mentions'] as const;
-const processors = ['deepspeech', 'aws', 'azure', 'gcp', 'compromisejs', 'naturaljs'] as const;
+const processors = ['gcp', 'opensource'] as const;
 const inputs = ['fs'] as const;
 const outputs = ['fs', 'postgres'] as const;
 
@@ -15,15 +15,6 @@ export interface ValidProcessesRequiredConfiguration {
     outputs: { [output in Output]?: string[] };
 }
 
-const awsCredentials = [
-    'AWS_ACCESS_KEY_ID',
-    'AWS_SECRET_ACCESS_KEY',
-    'S3_BUCKET'
-];
-const azureTextAnalyticsCredentials = [
-    'AZURE_TEXT_ANALYTICS_ENDPOINT',
-    'AZURE_TEXT_ANALYTICS_KEY'
-]
 const filesystemAudio = [ 'AUDIO_DIRECTORY' ];
 const filesystemTranscript = [ 'TRANSCRIPT_DIRECTORY' ];
 const postgresDb = {
@@ -39,9 +30,7 @@ export const ValidProcesses: { [process in Process]: ValidProcessesRequiredConfi
     'transcribe': {
         sourceStages: 2,
         processors: {
-            'deepspeech': [ 'DEEPSPEECH_VERSION' ],
-            'aws': awsCredentials.concat([ 'AWS_TRANSCRIBE_PENDING_BUCKET' ]),
-            'azure': [ 'AZURE_SUBSCRIPTION_KEY' ],
+            'opensource': [ 'DEEPSPEECH_VERSION' ],
             'gcp': [ 'GOOGLE_APPLICATION_CREDENTIALS' ]
         },
         inputs: {
@@ -54,10 +43,8 @@ export const ValidProcesses: { [process in Process]: ValidProcessesRequiredConfi
     'analyse-sentiment': {
         sourceStages: 3,
         processors: {
-            'aws': awsCredentials,
-            'azure': azureTextAnalyticsCredentials,
             'gcp': [],
-            'naturaljs': []
+            'opensource': []
         },
         inputs: {
             'fs': filesystemTranscript
@@ -67,10 +54,8 @@ export const ValidProcesses: { [process in Process]: ValidProcessesRequiredConfi
     'analyse-mentions': {
         sourceStages: 3,
         processors: {
-            'aws': awsCredentials,
-            'azure': azureTextAnalyticsCredentials,
             'gcp': [],
-            'compromisejs': []
+            'opensource': []
         },
         inputs: {
             'fs': filesystemTranscript

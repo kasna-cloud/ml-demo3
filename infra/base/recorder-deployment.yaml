@@ -74,9 +74,9 @@ spec:
             cpu: 60m
             memory: 50Mi
         volumeMounts:
-        - name: audio-blobs
+        - name: audio
           mountPath: /mnt
       volumes:
-      - name: audio-blobs
+      - name: audio
         persistentVolumeClaim:
-          claimName: audio-blobs
+          claimName: audio

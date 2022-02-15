@@ -1,34 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sentiment-analyser
+  name: gcp-sentiment
   labels:
     app: radio-monitor
-    component: sentiment-analyser
+    component: gcp-sentiment
 spec:
   selector:
     matchLabels:
       app: radio-monitor
-      component: sentiment-analyser
+      component: gcp-sentiment
   template:
     metadata:
       labels:
         app: radio-monitor
-        component: sentiment-analyser
+        component: gcp-sentiment
     spec:
       containers:
-      - name: sentiment-analyser-naturaljs
+      - name: gcp-sentiment-analyser
         image: gcr.io/PROJECT_ID/radio-monitor:latest-base
         env:
         - name: POSTGRESQL_HOST
           valueFrom:
-            configMapKeyRef:
-              name: radio-monitor-config-cm
+            secretKeyRef:
+              name: radio-monitor-secrets
               key: postgresHost
         - name: POSTGRESQL_DATABASE
           valueFrom:
-            configMapKeyRef:
-              name: radio-monitor-config-cm
+            secretKeyRef:
+              name: radio-monitor-secrets
               key: postgresDatabase
         - name: POSTGRESQL_USERNAME
           valueFrom:
@@ -44,11 +44,10 @@ spec:
           value: /mnt/transcript
         args:
         - analyse-sentiment
-        - naturaljs
+        - opensource
         - --input=fs
         - --output=postgres
         - --sources=3LO:ffmpeg:gcpspeechtotext
-        # ,3LO:ffmpeg:awstranscribe,3AW:ffmpeg:awstranscribe,3LO:ffmpeg:gcpspeechtotext,3AW:ffmpeg:gcpspeechtotext,3LO:ffmpeg:azurespeechtotext,3AW:ffmpeg:azurespeechtotext
         resources:
           requests:
             cpu: 100m
@@ -58,9 +57,9 @@ spec:
             # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
             memory: 1000Mi
         volumeMounts:
-        - name: transcript-blobs
+        - name: transcripts
           mountPath: /mnt/transcript
       volumes:
-      - name: transcript-blobs
+      - name: transcripts
         persistentVolumeClaim:
-          claimName: transcript-blobs
+          claimName: transcripts

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-mentions
+  labels:
+    app: radio-monitor
+    component: gcp-mentions
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: gcp-mentions
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: gcp-mentions
+    spec:
+      containers:
+      - name: gcp-mentions-analyser
+        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        env:
+        - name: POSTGRESQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresHost
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresDatabase
+        - name: POSTGRESQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresUsername
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: radio-monitor-secrets
+              key: postgresPassword
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/transcript
+        args:
+        - analyse-mentions
+        - gcp
+        - --input=fs
+        - --output=postgres
+        - --sources=3LO:ffmpeg:gcpspeechtotext
+        resources:
+          requests:
+            cpu: 100m
+            memory: 800Mi
+          limits:
+            cpu: 200m
+            # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
+            memory: 1000Mi
+        volumeMounts:
+        - name: transcripts
+          mountPath: /mnt/transcript
+      volumes:
+      - name: transcripts
+        persistentVolumeClaim:
+          claimName: transcripts

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-demos
+  labels:
+    app: demo-dash
+    component: grafana
+spec:
+  selector:
+    matchLabels:
+      app: demo-dash
+      component: grafana
+  template:
+    metadata:
+      labels:
+        app: demo-dash
+        component: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:7.5.10
+        env:
+        - name: GF_INSTALL_PLUGINS
+          value: grafana-worldmap-panel
+        volumeMounts:
+        - mountPath: /etc/grafana
+          name: config-ini
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: dashboards
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: datasources
+        ports:
+        - containerPort: 3000
+          name: web
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 50m
+            memory: 512Mi
+      volumes:
+      - name: config-ini
+        configMap:
+          name: grafana
+      - name: datasources
+        secret:
+          secretName: demo-dash-datasource-secrets
+      - name: dashboards
+        configMap:
+          name: grafana-dashboards

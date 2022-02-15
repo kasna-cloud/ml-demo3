@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opensource-transcriber
+  labels:
+    app: radio-monitor
+    component: opensource-transcriber
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: opensource-transcriber
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: opensource-transcriber
+    spec:
+      initContainers:
+      - name: create-sub-dirs
+        image: busybox:stable
+        command: ['sh', '-c', 'mkdir -p /mnt/transcript/3LO:ffmpeg:deepspeech-0.9.3']
+        volumeMounts:
+        - name: transcripts
+          mountPath: /mnt/transcript
+      containers:
+      - name: opensource-transcriber-deepspeech
+        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        env:
+        - name: AUDIO_DIRECTORY
+          value: /mnt/audio
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/transcript
+        - name: DEEPSPEECH_TFLITE
+          value: "true"
+        args:
+        - transcribe
+        - opensource
+        - --input=fs
+        - --output=fs
+        - --sources=3LO:ffmpeg
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 1000Mi
+          limits:
+            cpu: 1500m
+            memory: 1000Mi
+        volumeMounts:
+        - name: audio
+          mountPath: /mnt/audio
+        - name: transcripts
+          mountPath: /mnt/transcript
+      volumes:
+      - name: audio
+        persistentVolumeClaim:
+          claimName: audio
+      - name: transcripts
+        persistentVolumeClaim:
+          claimName: transcripts

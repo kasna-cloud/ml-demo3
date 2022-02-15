@@ -1,8 +1,0 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: radio-monitor-config-cm
-data:
-  s3Bucket: lucas-radio-streaming
-  postgresHost:  radio-monitor
-  postgresDatabase: radio-monitor 

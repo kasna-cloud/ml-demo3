@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-transcriber
+  labels:
+    app: radio-monitor
+    component: gcp-transcriber
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: gcp-transcriber
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: gcp-transcriber
+    spec:
+      initContainers:
+      - name: create-sub-dirs
+        image: busybox:stable
+        command: ['sh', '-c', 'mkdir -p /mnt/transcript/3LO:ffmpeg:deepspeech-0.9.3']
+        volumeMounts:
+        - name: transcripts
+          mountPath: /mnt/transcript
+      containers:
+      - name: gcp-transcriber
+        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        env:
+        - name: AUDIO_DIRECTORY
+          value: /mnt/audio
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/transcript
+        args:
+        - transcribe
+        - gcp
+        - --input=fs
+        - --output=fs
+        - --sources=3LO:ffmpeg
+        resources:
+          requests:
+            cpu: 100m
+            memory: 800Mi
+          limits:
+            cpu: 200m
+            # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
+            memory: 1000Mi
+        volumeMounts:
+        - name: audio
+          mountPath: /mnt/audio
+        - name: transcripts
+          mountPath: /mnt/transcript
+      volumes:
+      - name: audio
+        persistentVolumeClaim:
+          claimName: audio
+      - name: transcripts
+        persistentVolumeClaim:
+          claimName: transcripts

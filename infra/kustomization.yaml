@@ -2,18 +2,17 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- base/mentions-analyser-deployment.yaml
+- base/filestore-pv.yaml
+- base/gcp-mentions-deployment.yaml
+- base/gcp-sentiment-deployment.yaml
+- base/gcp-transcriber-deployment.yaml
+- base/opensource-mentions-deployment.yaml
+- base/opensource-sentiment-deployment.yaml
+- base/opensource-transcriber-deployment.yaml
 - base/recorder-deployment.yaml
-- base/sentiment-analyser-deployment.yaml
 - base/storage-audio-pvc.yaml
-- base/storage-audio-storageclass.yaml
 - base/storage-transcript-pvc.yaml
-- base/storage-transcript-storageclass.yaml
-#- base/transcriber-deployment-3lo.yaml
-# Disable one of the transcribers for cost saving:
-# - base/transcriber-deployment-2bl.yaml
 
-- overlays/staging/radio-monitor-config-cm.yaml
 - overlays/staging/radio-monitor-secrets.yaml
 
-namespace: radio-monitor
+namespace: default
