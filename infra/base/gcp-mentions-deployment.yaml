@@ -41,7 +41,7 @@ spec:
               name: radio-monitor-secrets
               key: postgresPassword
         - name: TRANSCRIPT_DIRECTORY
-          value: /mnt/transcript
+          value: /mnt/rm-nfs/transcripts
         args:
         - analyse-mentions
         - gcp
@@ -57,9 +57,9 @@ spec:
             # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
             memory: 1000Mi
         volumeMounts:
-        - name: transcripts
-          mountPath: /mnt/transcript
+        - name: nfs
+          mountPath: /mnt/rm-nfs
       volumes:
-      - name: transcripts
+      - name: nfs
         persistentVolumeClaim:
-          claimName: transcripts
+          claimName: radio-monitor-nfs

@@ -19,18 +19,18 @@ spec:
       initContainers:
       - name: create-sub-dirs
         image: busybox:stable
-        command: ['sh', '-c', 'mkdir -p /mnt/transcript/3LO:ffmpeg:deepspeech-0.9.3']
+        command: ['sh', '-c', 'mkdir -p /mnt/rm-nfs/transcripts/3LO:ffmpeg:deepspeech-0.9.3']
         volumeMounts:
-        - name: transcripts
-          mountPath: /mnt/transcript
+        - name: nfs
+          mountPath: /mnt/rm-nfs
       containers:
       - name: opensource-transcriber-deepspeech
         image: gcr.io/PROJECT_ID/radio-monitor:latest
         env:
         - name: AUDIO_DIRECTORY
-          value: /mnt/audio
+          value: /mnt/rm-nfs/audio
         - name: TRANSCRIPT_DIRECTORY
-          value: /mnt/transcript
+          value: /mnt/rm-nfs/transcripts
         - name: DEEPSPEECH_TFLITE
           value: "true"
         args:
@@ -47,14 +47,9 @@ spec:
             cpu: 1500m
             memory: 1000Mi
         volumeMounts:
-        - name: audio
-          mountPath: /mnt/audio
-        - name: transcripts
-          mountPath: /mnt/transcript
+        - name: nfs
+          mountPath: /mnt/rm-nfs
       volumes:
-      - name: audio
+      - name: nfs
         persistentVolumeClaim:
-          claimName: audio
-      - name: transcripts
-        persistentVolumeClaim:
-          claimName: transcripts
+          claimName: radio-monitor-nfs

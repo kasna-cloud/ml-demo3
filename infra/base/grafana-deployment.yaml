@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana-demos
+  name: grafana
   labels:
-    app: demo-dash
+    app: radio-monitor
     component: grafana
 spec:
   selector:
     matchLabels:
-      app: demo-dash
+      app: radio-monitor
       component: grafana
   template:
     metadata:
       labels:
-        app: demo-dash
+        app: radio-monitor
         component: grafana
     spec:
       containers:

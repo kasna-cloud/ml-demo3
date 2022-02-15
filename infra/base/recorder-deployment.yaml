@@ -19,10 +19,10 @@ spec:
       initContainers:
       - name: create-sub-dirs
         image: busybox:stable
-        command: ['sh', '-c', 'mkdir -p /mnt/3LO:ffmpeg /mnt/2BL:ffmpeg']
+        command: ['sh', '-c', 'mkdir -p /mnt/rm-nfs/audio/3LO:ffmpeg']
         volumeMounts:
-        - name: audio
-          mountPath: /mnt
+        - name: nfs
+          mountPath: /mnt/rm-nfs
       containers:
       - name: ffmpeg-3lo
         image: jrottenberg/ffmpeg:4.1-scratch
@@ -39,7 +39,7 @@ spec:
         - '60'
         - -strftime
         - '1'
-        - /mnt/3LO:ffmpeg/%Y-%m-%dT%H:%M:%SZ.mp3
+        - /mnt/rm-nfs/audio/3LO:ffmpeg/%Y-%m-%dT%H:%M:%SZ.mp3
         resources:
           limits:
             cpu: 60m
@@ -48,35 +48,9 @@ spec:
             cpu: 60m
             memory: 50Mi
         volumeMounts:
-        - name: audio
-          mountPath: /mnt
-      - name: ffmpeg-2bl
-        image: jrottenberg/ffmpeg:4.1-scratch
-        args:
-        # Input
-        - -i
-        - https://live-radio01.mediahubaustralia.com/2LRW/mp3/
-        # Output
-        - -c:a
-        - mp3
-        - -f
-        - segment
-        - -segment_time
-        - '60'
-        - -strftime
-        - '1'
-        - /mnt/2BL:ffmpeg/%Y-%m-%dT%H:%M:%SZ.mp3
-        resources:
-          limits:
-            cpu: 60m
-            memory: 50Mi
-          requests:
-            cpu: 60m
-            memory: 50Mi
-        volumeMounts:
-        - name: audio
-          mountPath: /mnt
+        - name: nfs
+          mountPath: /mnt/rm-nfs
       volumes:
-      - name: audio
+      - name: nfs
         persistentVolumeClaim:
-          claimName: audio
+          claimName: radio-monitor-nfs
