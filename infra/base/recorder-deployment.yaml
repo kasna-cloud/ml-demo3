@@ -21,7 +21,7 @@ spec:
         image: busybox:stable
         command: ['sh', '-c', 'mkdir -p /mnt/3LO:ffmpeg /mnt/2BL:ffmpeg']
         volumeMounts:
-        - name: audio-blobs
+        - name: audio
           mountPath: /mnt
       containers:
       - name: ffmpeg-3lo
@@ -48,7 +48,7 @@ spec:
             cpu: 60m
             memory: 50Mi
         volumeMounts:
-        - name: audio-blobs
+        - name: audio
           mountPath: /mnt
       - name: ffmpeg-2bl
         image: jrottenberg/ffmpeg:4.1-scratch
