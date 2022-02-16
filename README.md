@@ -3,31 +3,54 @@
 This repo contains the code for the Kasna/Eliiza Google ML Specialisation, demo 3.
 Code Repo: https://github.com/kasna-cloud/ml-demo3
 
-Radio monitoring live dashboard:
-https://grafana.eliiza.ai/d/radio-analytics/real-time-radio-analytics?orgId=1&refresh=1m
-
-Radio monitoring application repo:
-https://gitlab.mantelgroup.com.au/eliiza/radio-media-monitoring/-/tree/aws-version/
-(note that its on the non-default branch, ignore the branch name tho)
-
-Radio monitoring k8s deployment repo:
-https://gitlab.mantelgroup.com.au/eliiza/eliiza-k8s/eliiza-apps/-/tree/staging/radio-monitor
-
 ## 2. Use-Case
 
-Example of an ML model using Pre-Trained ML APIs OR AutoML and trained/evaluated using any dataset. If using Pre-Trained ML APIs, the training of the model need not be described. If using AutoML, hyper-parameter tuning and model design/architecture optimization need not be described.
+### Background
+
+The City of Melbourne regularly monitors media channels to understand how the general public is responding to marketing campaigns and news related to the City in Melbourne in general. Automatic monitoring of social media and online news is being managed by an existing solution, but the monitoring of broadcast radio, especially talk-back radio, is manual and ad-hoc. 
+
+### Solution Overview 
+
+Eliiza has developed a solution for The City of Melbourne to automatically monitor broadcast radio. This solution provides summary reports of most discussed daily and weekly topics across the various talk-back channels as well as the sentiment associated with each topic scored from -1 (negative) through to 1 (positive) with neutral sentiment at 0. Additionally, alerts are able to configured to notify the PR function within the City of Melbourne when specific topics are being discussed within a few minutes of them occurring. This provides the organistion with the ability review the audio of what was being discussed and to quickly respond to topics as they are being discussed live on-air. 
+
+### Solution Detail
+
+The technical solution makes use of the Google Cloud AI Services, Speech API and Natural Language API. The diagram below shows the overall system architecture. 
+
+![Radio Sentiment Monitoring Architecture](app/RadioSentimentMonitoring.png)
+
+* **Audio Stream Capture** - A Compute Engine instance which runs a process to capture each audio stream and delivers audio in snippets (currently 60 second pieces of audio) into the Cloud Storage location
+* **Audio Snippets** - Raw audio snippets that can been stored in .flac format so they are ready to be processed
+* **Process Audio** - A Cloud Function that is triggered from events in Cloud Storage. When a new audio snippet is stored in Cloud Storage the function converts that audio to text using the Google Speech API. The text response is then passed to the Natural Language API to extract conversation topics and their associated sentiment. These topic/sentiment pairs are then stored in the Topic Store along with the timestamp they occurred and the audio channel they were sourced from. 
+* **Topic Store** - A Cloud SQL MySQL instance that acts as a time-series store of topic/sentiment events per audio channel
+* **Grafana** - A dashboard tool running on Google Kubernetes Engine that is able to provide various flexible data visualisations and alerting on time-series data. In this instance it is being used to display real-time topics being discussed, the top 10 topics, and their associated sentiments, all within a time-window selected by the end-user
+
+### Audio Capture Process
+
+The Audio Capture Process makes use of the `ffmpeg` command line tool to be able to capture audio streams and store regular audio snippets in the `.flac` format appropriate for Google Speech API. 
+
+The sample command below is what is used to capture the ABC 3LO radio live-stream. It firstly segments the audio into 60 second seconds and stores it as a `.flac` file with a timestamp filename. Additional it stores hourly snippets in `mp3` format. The smaller snippets are to be processed and discarded, while the longer `mp3` files are retained to enable later review of the audio at a point in time to help understand the context of a topic being discussed. 
+
+The files are stored in Cloud Storage through the use of the `Cloud Storage FUSE` which supports mounting of Cloud storage buckets as file systems.  
+
+`ffmpeg -i http://live-radio01.mediahubaustralia.com/3LRW/mp3/ -c:a flac -f segment -segment_time 60 -s
+trftime 1 "3LO/%Y-%m-%d_%H-%M-%S.flac" -c:a mp3 -f segment -segment_time 3600 -strftime 1 "3LO-long/%Y-%m-%d_%H-%M-
+%S.mp3"`
+
+### Topic Dashboard
+
+The image below shows the dashboard running live against ABC Radio 3LO from the last 6 hours and refreshing every minute. The list on the right contains the topics in real-time along with their associated sentiment. The list on the left aggregates the topics over the viewed period and shows the top ten. During this particular morning of talk-back radio China and New Zealand were discussed in detail. The graph below gives a simple overall feel that the sentiment of topics is generally more negative than positive (as you would expect of talk-back radio). 
+
+![radio-dashboard.png](app/radio-dashboard.png)
 
 ## 3. Success Criteria
 ### 3.3.1 Code
 #### 3.3.1.1 Code Repository
-Partners must provide a link to the code repository (e.g., GitHub, GitLab, GCP CSR), which includes a ReadMe file.
 
-*Evidence* must include an active link to the code repository containing all code that is used in demo # 3. This code must be reviewable/readable by the assessor, and modifiable by the customer. In addition, the repository should contain a ReadMe file with code descriptions and detailed instructions for running model/application.
+Code Repo: https://github.com/kasna-cloud/ml-demo3
 
 #### 3.3.1.2 Code origin certification
-Partners must certify to either of these two scenarios: 1) all code is original and developed within the partner organization, or 2) licensed code is used, post-modification.
-
-*Evidence* must include a certification by the partner organization for either of the above code origin scenarios. In addition, if licensed code is used post-modification, the partner must certify that the code has been modified per license specifications.
+Kasna verifies that all code is original and developed within the partner organization.
 
 ### 3.3.2 Data
 #### 3.3.2.1 Dataset in GCP
