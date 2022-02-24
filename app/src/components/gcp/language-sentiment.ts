@@ -7,7 +7,7 @@ import { map } from "rxjs/operators";
 
 export class GcpLanguageSentiment implements ITransformer<Transcript, SentimentSample> {
 
-    public readonly processName: string = `gcplanguage`;
+    public readonly processName: string = `gcp`;
 
     private readonly languageClient: language.v1.LanguageServiceClient;
 

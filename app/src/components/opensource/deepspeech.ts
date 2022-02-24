@@ -6,40 +6,24 @@ import { map } from 'rxjs/operators';
 import { ITransformer } from '../../interfaces/sample-interface';
 
 import { Model as Model09TFType } from 'deepspeech09-tf';
-import { Model as Model09Type } from 'deepspeech09';
-import { Model as Model07TFType } from 'deepspeech07-tf';
-import { Model as Model07Type } from 'deepspeech07';
 
 
 export class DeepSpeechTranscriber implements ITransformer<AudioSegment, Transcript> {
 
     public processName: string;
     private deepspeechVersion: string;
-    private deepspeechModel: Model09Type | Model09TFType | Model07Type | Model07TFType;
+    private deepspeechModel: Model09TFType;
 
     constructor(deepspeechVersion: string) {
         this.deepspeechVersion = deepspeechVersion;
-        this.processName = `deepspeech-${this.deepspeechVersion}`;
+        this.processName = `deepspeech`;
         const tfEnabled = Boolean(process.env["DEEPSPEECH_TFLITE"]);
 
         let DeepSpeech = null;
 
-        if (this.deepspeechVersion.startsWith('0.9.')) {
-            if (tfEnabled) {
-                console.log('Initialising Deepspeech in version 0.9.* mode with TF Lite enabled');
-                DeepSpeech = require('deepspeech09-tf');
-            } else {
-                console.log('Initialising Deepspeech in version 0.9.* mode with TF Lite disabled');
-                DeepSpeech = require('deepspeech09');
-            }
-        } else if (this.deepspeechVersion.startsWith('0.7.')) {
-            if (tfEnabled) {
-                console.log('Initialising Deepspeech in version 0.7.* mode with TF Lite enabled');
-                DeepSpeech = require('deepspeech07-tf');
-            } else {
-                console.log('Initialising Deepspeech in version 0.7.* mode with TF Lite disabled');
-                DeepSpeech = require('deepspeech07');
-            }
+        if (this.deepspeechVersion.startsWith('0.9.') && tfEnabled) {
+            console.log('Initialising Deepspeech in version 0.9.* mode with TF Lite enabled');
+            DeepSpeech = require('deepspeech09-tf');
         } else {
             console.log(`Deepspeech version ${this.deepspeechVersion} is not supported.`);
             throw new Error('Unsupported Deepspeech version');

@@ -7,7 +7,7 @@ import { MentionsSample, Mention, MentionCategory } from "../../models/analytics
 
 export class GcpLanguageMentions implements ITransformer<Transcript, MentionsSample> {
 
-    public readonly processName: string = `gcplanguage`;
+    public readonly processName: string = `gcp`;
 
     private readonly languageClient: language.v1.LanguageServiceClient;
 

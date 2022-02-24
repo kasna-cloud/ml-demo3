@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: opensource-sentiment-analyser
-        image: gcr.io/PROJECT_ID/radio-monitor:latest-base
+        image: gcr.io/${PROJECT_ID}/radio-monitor:latest
         env:
         - name: POSTGRESQL_HOST
           valueFrom:
@@ -47,7 +47,7 @@ spec:
         - opensource
         - --input=fs
         - --output=postgres
-        - --sources=3LO:ffmpeg:gcpspeechtotext
+        - --sources=3LO:ffmpeg:gcpspeechtotext,3LO:ffmpeg:deepspeech-0.9.3
         resources:
           requests:
             cpu: 100m

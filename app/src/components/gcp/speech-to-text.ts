@@ -8,7 +8,7 @@ import { map } from "rxjs/operators";
 
 export class GcpSpeechToText implements ITransformer<AudioSegment, Transcript> {
 
-    public readonly processName: string = `gcpspeechtotext`;
+    public readonly processName: string = `gcp`;
 
     private readonly speechClient;
     private readonly audioLanguageCode: string;

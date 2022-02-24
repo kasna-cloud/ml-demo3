@@ -16,6 +16,7 @@ spec:
         app: radio-monitor
         component: gcp-transcriber
     spec:
+      serviceAccountName: radio-monitor-gcp
       initContainers:
       - name: create-sub-dirs
         image: busybox:stable
@@ -25,7 +26,7 @@ spec:
           mountPath: /mnt/rm-nfs
       containers:
       - name: gcp-transcriber
-        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        image: gcr.io/${PROJECT_ID}/radio-monitor:latest
         env:
         - name: AUDIO_DIRECTORY
           value: /mnt/rm-nfs/audio

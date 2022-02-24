@@ -25,12 +25,14 @@ spec:
           mountPath: /mnt/rm-nfs
       containers:
       - name: opensource-transcriber-deepspeech
-        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        image: gcr.io/${PROJECT_ID}/radio-monitor:latest-deepspeech
         env:
         - name: AUDIO_DIRECTORY
           value: /mnt/rm-nfs/audio
         - name: TRANSCRIPT_DIRECTORY
           value: /mnt/rm-nfs/transcripts
+        - name: DEEPSPEECH_VERSION
+          value: "0.9.3"
         - name: DEEPSPEECH_TFLITE
           value: "true"
         args:

@@ -5,10 +5,12 @@ resources:
 - base/filestore-pv.yaml
 - base/filestore-pvc.yaml
 - base/gcp-mentions-deployment.yaml
+- base/gcp-sa.yaml
 - base/gcp-sentiment-deployment.yaml
 - base/gcp-transcriber-deployment.yaml
-- base/grafana-dashboards-cm.yaml
+- base/grafana-cm.yaml
 - base/grafana-deployment.yaml
+- base/grafana-sa.yaml
 - base/grafana-service.yaml
 - base/opensource-mentions-deployment.yaml
 - base/opensource-sentiment-deployment.yaml

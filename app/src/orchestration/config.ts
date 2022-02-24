@@ -30,8 +30,8 @@ export const ValidProcesses: { [process in Process]: ValidProcessesRequiredConfi
     'transcribe': {
         sourceStages: 2,
         processors: {
-            'opensource': [ 'DEEPSPEECH_VERSION' ],
-            'gcp': [ 'GOOGLE_APPLICATION_CREDENTIALS' ]
+            'gcp': [],
+            'opensource': [ 'DEEPSPEECH_VERSION' ]
         },
         inputs: {
             'fs': filesystemAudio

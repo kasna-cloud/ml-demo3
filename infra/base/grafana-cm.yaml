@@ -1,12 +1,34 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: grafana-dashboards
+  name: grafana
   labels:
     app: radio-monitor
     component: grafana
 data:
-  radioMonitor.json: |-
+  grafana.ini: |-
+    [server]
+    enable_gzip = true
+    # [auth.anonymous]
+    # enabled = true
+    # [auth]
+    # disable_login_form = true
+    # [security]
+    # disable_initial_admin_creation = true
+  datasources.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Radio
+        type: postgres
+        access: proxy
+        url: http://localhost:5432
+        database: postgres
+        user: postgres
+        jsonData:
+          postgresVersion: 1200
+        secureJsonData:
+          password: zgKmM7wZCy!xqSdNy3
+  radiomonitor.json: |-
     {
       "annotations": {
         "list": [

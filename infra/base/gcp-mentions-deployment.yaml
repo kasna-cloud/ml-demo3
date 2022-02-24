@@ -16,9 +16,10 @@ spec:
         app: radio-monitor
         component: gcp-mentions
     spec:
+      serviceAccountName: radio-monitor-gcp
       containers:
       - name: gcp-mentions-analyser
-        image: gcr.io/PROJECT_ID/radio-monitor:latest
+        image: gcr.io/${PROJECT_ID}/radio-monitor:latest
         env:
         - name: POSTGRESQL_HOST
           valueFrom:
@@ -47,7 +48,7 @@ spec:
         - gcp
         - --input=fs
         - --output=postgres
-        - --sources=3LO:ffmpeg:gcpspeechtotext
+        - --sources=3LO:ffmpeg:gcpspeechtotext,3LO:ffmpeg:deepspeech-0.9.3
         resources:
           requests:
             cpu: 100m

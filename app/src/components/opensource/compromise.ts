@@ -12,7 +12,7 @@ export class CompromiseAnalyticsProcessor implements ITransformer<Transcript, Me
 
     constructor(compromiseVersion: string) {
         this.compromiseVersion = compromiseVersion;
-        this.processName = `compromise-${this.compromiseVersion}`;
+        this.processName = `opensource`;
     }
 
     public transform(transcript: Transcript): Observable<MentionsSample> {

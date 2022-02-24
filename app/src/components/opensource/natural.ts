@@ -14,7 +14,7 @@ export class NaturalAnalyticsProcessor implements ITransformer<Transcript, Senti
 
     constructor(naturalVersion: string) {
         this.naturalVersion = naturalVersion;
-        this.processName = `natural-${this.naturalVersion}`;
+        this.processName = `opensource`;
         this.tokenizer = new nlp.WordTokenizer();
         this.sentimentAnalyzer = new nlp.SentimentAnalyzer("English", nlp.PorterStemmer, "afinn");
     }

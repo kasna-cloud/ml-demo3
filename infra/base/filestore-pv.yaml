@@ -8,5 +8,5 @@ spec:
   accessModes:
   - ReadWriteMany
   nfs:
-    path: /radio-monitor
+    path: /radiomonitor
     server: 10.96.141.194
