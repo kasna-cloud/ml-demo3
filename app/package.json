@@ -10,6 +10,7 @@
         "debug": "node -r ts-node/register --inspect=0.0.0.0:9229 src/orchestration/main.ts"
     },
     "dependencies": {
+        "@google-cloud/storage": "^5.18.2",
         "@google-cloud/language": "^4.3.2",
         "@google-cloud/speech": "^4.10.0",
         "@types/bent": "~7.0.2",

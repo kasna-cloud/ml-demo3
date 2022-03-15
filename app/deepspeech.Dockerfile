@@ -1,4 +1,4 @@
-FROM node:16-bullseye-slim as model
+FROM node:12-bullseye-slim as model
 ARG DEEPSPEECH_VERSION=0.9.3
 
 WORKDIR /root/${DEEPSPEECH_VERSION}
@@ -10,7 +10,7 @@ RUN apt-get update \
 
 RUN curl -LOO https://github.com/mozilla/DeepSpeech/releases/download/v${DEEPSPEECH_VERSION}/deepspeech-${DEEPSPEECH_VERSION}-models.{tflite,pbmm,scorer}
 
-FROM node:16-bullseye-slim
+FROM node:12-bullseye-slim
 ARG DEEPSPEECH_VERSION=0.9.3
 
 WORKDIR /root

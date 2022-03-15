@@ -1,4 +1,4 @@
-FROM node:16-bullseye-slim
+FROM node:12-bullseye-slim
 
 WORKDIR /root
 

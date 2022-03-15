@@ -16,7 +16,7 @@ export class DeepSpeechTranscriber implements ITransformer<AudioSegment, Transcr
 
     constructor(deepspeechVersion: string) {
         this.deepspeechVersion = deepspeechVersion;
-        this.processName = `deepspeech`;
+        this.processName = `opensource`;
         const tfEnabled = Boolean(process.env["DEEPSPEECH_TFLITE"]);
 
         let DeepSpeech = null;

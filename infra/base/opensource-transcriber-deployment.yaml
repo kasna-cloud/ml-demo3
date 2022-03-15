@@ -19,7 +19,7 @@ spec:
       initContainers:
       - name: create-sub-dirs
         image: busybox:stable
-        command: ['sh', '-c', 'mkdir -p /mnt/rm-nfs/transcripts/3LO:ffmpeg:deepspeech-0.9.3']
+        command: ['sh', '-c', 'mkdir -p /mnt/rm-nfs/transcripts/3LO:ffmpeg:opensource']
         volumeMounts:
         - name: nfs
           mountPath: /mnt/rm-nfs

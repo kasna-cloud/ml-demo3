@@ -16,38 +16,41 @@ spec:
         app: radio-monitor
         component: opensource-sentiment
     spec:
+      serviceAccountName: radio-monitor-grafana
       containers:
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.28.1
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=${PROJECT_ID}:australia-southeast1:radio-monitor-db=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 1000m
+            memory: 1024Mi
       - name: opensource-sentiment-analyser
         image: gcr.io/${PROJECT_ID}/radio-monitor:latest
         env:
         - name: POSTGRESQL_HOST
-          valueFrom:
-            secretKeyRef:
-              name: radio-monitor-secrets
-              key: postgresHost
+          value: localhost
         - name: POSTGRESQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: radio-monitor-secrets
-              key: postgresDatabase
+          value: radiomonitor
         - name: POSTGRESQL_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: radio-monitor-secrets
-              key: postgresUsername
+          value: postgres
         - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: radio-monitor-secrets
-              key: postgresPassword
+          value: zgKmM7wZCy!xqSdNy3
         - name: TRANSCRIPT_DIRECTORY
           value: /mnt/rm-nfs/transcripts
         args:
-        - analyse-mentions
+        - analyse-sentiment
         - opensource
         - --input=fs
         - --output=postgres
-        - --sources=3LO:ffmpeg:gcpspeechtotext,3LO:ffmpeg:deepspeech-0.9.3
+        - --sources=3LO:ffmpeg:gcp,3LO:ffmpeg:opensource
         resources:
           requests:
             cpu: 100m

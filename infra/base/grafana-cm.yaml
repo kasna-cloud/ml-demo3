@@ -21,10 +21,11 @@ data:
       - name: Radio
         type: postgres
         access: proxy
-        url: http://localhost:5432
-        database: postgres
+        url: localhost:5432
+        database: radiomonitor
         user: postgres
         jsonData:
+          sslmode: disable
           postgresVersion: 1200
         secureJsonData:
           password: zgKmM7wZCy!xqSdNy3

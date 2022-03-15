@@ -49,7 +49,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member serviceAccount:403414403869@cloudbuild.gserviceaccount.com \
     --role roles/container.developer
 
-# Create SA for calling ML apis
+# Create SA for processing components
 gcloud iam service-accounts create radio-monitor-gcp-api \
     --description="GKE Workload Identity for GCP ML API calls" \
     --display-name="radio-monitor-gcp-api"
@@ -57,6 +57,10 @@ gcloud iam service-accounts create radio-monitor-gcp-api \
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:radio-monitor-gcp-api@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/speech.client"
+# Give it auth to connect to cloud sql
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:radio-monitor-gcp-api@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/cloudsql.client"
 # Bind it to k8s SA
 gcloud iam service-accounts add-iam-policy-binding \
     --role="roles/iam.workloadIdentityUser" \

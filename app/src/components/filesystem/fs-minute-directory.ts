@@ -10,6 +10,7 @@ export abstract class FSMinuteDirectory {
     
     private readonly directory: string;
     private readonly fileExtension: string;
+    private readonly minimumDelay: number;
 
     private mostRecentSamples: { [source: string]: ISample };
 
@@ -19,10 +20,12 @@ export abstract class FSMinuteDirectory {
 
     constructor(
         directory: string,
-        fileExtension: string
+        fileExtension: string,
+        minimumDelay: number = 3,
     ) {
         this.directory = directory;
         this.fileExtension = fileExtension;
+        this.minimumDelay = minimumDelay;
         this.mostRecentSamples = {};
 
         // Bind some library functions into reactivex versions
@@ -91,6 +94,11 @@ export abstract class FSMinuteDirectory {
             mergeAll(),
             filter(sample => {
                 const source = this.getSource(sample.processChain);
+                const minimumDelay = new Date();
+                minimumDelay.setMinutes(minimumDelay.getMinutes() - this.minimumDelay)
+                if (sample.timestamp > minimumDelay) {
+                    return false;
+                }
                 if (sample.timestamp > this.mostRecentSamples[source].timestamp) {
                     this.mostRecentSamples[source] = sample;
                     return true;
