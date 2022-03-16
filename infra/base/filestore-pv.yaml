@@ -9,4 +9,4 @@ spec:
   - ReadWriteMany
   nfs:
     path: /radiomonitor
-    server: 10.96.141.194
+    server: ${RADIO_NFS_IPADDRESS}

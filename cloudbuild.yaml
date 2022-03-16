@@ -13,8 +13,9 @@ steps:
     - -c
     - |
       export PROJECT_ID=${PROJECT_ID}
+      export RADIO_NFS_IPADDRESS=$(gcloud filestore instances describe radio-monitor --project=${PROJECT_ID} --zone=australia-southeast1-a --format="get(networks[0].ipAddresses[0])")
       kustomize build infra > combined.yaml
-      envsubst < combined.yaml > subbed.yaml
+      envsubst '$${PROJECT_ID},$${RADIO_NFS_IPADDRESS}' < combined.yaml > subbed.yaml
       gke-deploy apply -f subbed.yaml --cluster radio-monitor --location australia-southeast1
 # images:
 #   - gcr.io/${PROJECT_ID}/radio-monitor:latest
