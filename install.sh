@@ -4,6 +4,9 @@
 PROJECT_ID=$(gcloud config get-value project)
 echo "Project ID: ${PROJECT_ID}"
 
+PROJECT_NUMBER=$(gcloud projects describe ml-spec-demo-3-sandbox --format="get(projectNumber)")
+echo "Project Number: ${PROJECT_NUMBER}"
+
 # Services
 echo "Enable Services ..."
 gcloud services enable \
@@ -44,10 +47,14 @@ gcloud container clusters create-auto radio-monitor \
     --project ${PROJECT_ID}
 
 # This gives cloud build the authority to call GKE
-# TODO: get this service account automatically??
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-    --member serviceAccount:403414403869@cloudbuild.gserviceaccount.com \
+    --member serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
     --role roles/container.developer
+
+# This gives cloud build the authority to get the filestore ip address
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
+    --role roles/file.viewer
 
 # Create SA for processing components
 gcloud iam service-accounts create radio-monitor-gcp-api \
