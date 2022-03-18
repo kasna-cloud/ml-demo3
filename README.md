@@ -44,8 +44,12 @@ The image below shows the dashboard running live against ABC Radio 3LO from the 
 ### Build and Deploy
 
 To install the base infrastructure in a new GCP project, run the following:
-`./install`
+```
+./install
+```
 
 To deploy the GKE python containers to GCP, run the deployment via Cloud Build:
-`gcloud builds submit`
+```
+gcloud builds submit
+```
 
