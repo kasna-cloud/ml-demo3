@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recorder
+  labels:
+    app: radio-monitor
+    component: recorder
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: recorder
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: recorder
+    spec:
+      initContainers:
+      - name: create-sub-dirs
+        image: busybox:stable
+        command: ['sh', '-c', 'mkdir -p /mnt/rm-nfs/audio/3LO:ffmpeg']
+        volumeMounts:
+        - name: nfs
+          mountPath: /mnt/rm-nfs
+      containers:
+      - name: ffmpeg-3lo
+        image: jrottenberg/ffmpeg:4.1-scratch
+        args:
+        # Input
+        - -i
+        - http://live-radio01.mediahubaustralia.com/3LRW/mp3/
+        # Output
+        - -c:a
+        - mp3
+        - -f
+        - segment
+        - -segment_time
+        - '60'
+        - -strftime
+        - '1'
+        - /mnt/rm-nfs/audio/3LO:ffmpeg/%Y-%m-%dT%H:%M:%SZ.mp3
+        resources:
+          limits:
+            cpu: 60m
+            memory: 50Mi
+          requests:
+            cpu: 60m
+            memory: 50Mi
+        volumeMounts:
+        - name: nfs
+          mountPath: /mnt/rm-nfs
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: radio-monitor-nfs

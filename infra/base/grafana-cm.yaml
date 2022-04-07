@@ -1,0 +1,530 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: grafana
+  labels:
+    app: radio-monitor
+    component: grafana
+data:
+  grafana.ini: |-
+    [server]
+    enable_gzip = true
+    [auth.anonymous]
+    enabled = true
+    [auth]
+    disable_login_form = true
+    [security]
+    disable_initial_admin_creation = true
+    [dashboards]
+    default_home_dashboard_path = /etc/grafana/provisioning/dashboards/radiomonitor.json
+  datasources.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Radio
+        type: postgres
+        access: proxy
+        url: localhost:5432
+        database: radiomonitor
+        user: postgres
+        jsonData:
+          sslmode: disable
+          postgresVersion: 1200
+        secureJsonData:
+          password: zgKmM7wZCy!xqSdNy3
+  radiomonitor.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 1,
+      "iteration": 1647313714703,
+      "links": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Radio",
+          "description": "Show's the top 10 things being mentioned over time",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 19,
+            "x": 0,
+            "y": 0
+          },
+          "hiddenSeries": false,
+          "id": 4,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.5.10",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "queryType": "randomWalk",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  $__timeGroup(\"timestamp\", $__interval, 0) as \"time\",\n  sum(\"count\"),\n  \"entity\"\nFROM mentions\nWHERE\n  \"entity\" IN (\n    SELECT \"entity\"\n    FROM mentions\n    WHERE $__timeFilter(\"timestamp\")\n    AND split_part(\"sourcechain\", ':', 3) = '${stt}'\n    AND split_part(\"sourcechain\", ':', 4) = '${mentions}'\n    GROUP BY \"entity\"\n    ORDER BY sum(\"count\") desc\n    LIMIT 10\n  )\n  AND split_part(\"sourcechain\", ':', 3) = '${stt}'\n  AND split_part(\"sourcechain\", ':', 4) = '${mentions}'\n  AND $__timeFilter(\"timestamp\")\nGROUP BY \"entity\", \"timestamp\"\nORDER BY \"timestamp\"",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "positive"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "sentiment",
+              "timeColumn": "\"timestamp\"",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Mentions Over Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Radio",
+          "description": "Shows the sentiment of what's being talked about over time",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 19,
+            "x": 0,
+            "y": 7
+          },
+          "hiddenSeries": false,
+          "id": 2,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.5.10",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "queryType": "randomWalk",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  (avg(\"positive\" - \"negative\")) AS \"Sentiment\",\n  split_part(\"sourcechain\", ':', 1) AS source\nFROM sentiment\nWHERE\n  $__timeFilter(\"timestamp\")\n  AND split_part(\"sourcechain\", ':', 3) = '${stt}'\n  AND split_part(\"sourcechain\", ':', 4) = '${sentiment}'\nGROUP BY 1, source\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "positive"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "sentiment",
+              "timeColumn": "\"timestamp\"",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Sentiment Over Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "Radio",
+          "description": "Total count of things mentioned, within selected time frame",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "sum"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  },
+                  {
+                    "id": "custom.displayMode",
+                    "value": "gradient-gauge"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "entity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 353
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Entity"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "category"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Entity Category"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 19,
+            "x": 0,
+            "y": 13
+          },
+          "id": 6,
+          "options": {
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Count"
+              }
+            ]
+          },
+          "pluginVersion": "7.5.10",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  sum(\"count\"),\n  entity,\n  category\nFROM mentions\nWHERE\n  $__timeFilter(\"timestamp\")\n  AND split_part(\"sourcechain\", ':', 3) = '${stt}'\n  AND split_part(\"sourcechain\", ':', 4) = '${mentions}'\n  -- AND count > '1'\n  AND category != 'QUANTITY'\nGROUP BY entity, category\nORDER BY sum",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "positive"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "sentiment",
+              "timeColumn": "\"timestamp\"",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Mentions",
+          "type": "table"
+        }
+      ],
+      "schemaVersion": 27,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "gcp",
+              "value": "gcp"
+            },
+            "description": null,
+            "error": null,
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "stt",
+            "options": [
+              {
+                "selected": true,
+                "text": "gcp",
+                "value": "gcp"
+              },
+              {
+                "selected": false,
+                "text": "opensource",
+                "value": "opensource"
+              }
+            ],
+            "query": "gcp,opensource",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "gcp",
+              "value": "gcp"
+            },
+            "description": null,
+            "error": null,
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "sentiment",
+            "options": [
+              {
+                "selected": true,
+                "text": "gcp",
+                "value": "gcp"
+              },
+              {
+                "selected": false,
+                "text": "opensource",
+                "value": "opensource"
+              }
+            ],
+            "query": "gcp,opensource",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "gcp",
+              "value": "gcp"
+            },
+            "description": null,
+            "error": null,
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "mentions",
+            "options": [
+              {
+                "selected": true,
+                "text": "gcp",
+                "value": "gcp"
+              },
+              {
+                "selected": false,
+                "text": "opensource",
+                "value": "opensource"
+              }
+            ],
+            "query": "gcp,opensource",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Radio Monitor",
+      "uid": "ZI0RCVP7z",
+      "version": 15
+    }

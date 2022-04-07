@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+    app: radio-monitor
+    component: grafana
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: grafana
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: grafana
+    spec:
+      serviceAccountName: radio-monitor-grafana
+      containers:
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.28.1
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=${PROJECT_ID}:australia-southeast1:radio-monitor-db=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 1000m
+            memory: 1024Mi
+      - name: grafana
+        image: grafana/grafana:7.5.10
+        volumeMounts:
+        - name: config
+          mountPath: /etc/grafana/grafana.ini
+          subPath: grafana.ini
+        - name: config
+          mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
+          subPath: datasources.yaml
+        - name: config
+          mountPath: /etc/grafana/provisioning/dashboards/radiomonitor.json
+          subPath: radiomonitor.json
+        ports:
+        - containerPort: 3000
+          name: web
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 1000m
+            memory: 1024Mi
+      volumes:
+      - name: config
+        configMap:
+          name: grafana

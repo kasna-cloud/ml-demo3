@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-mentions
+  labels:
+    app: radio-monitor
+    component: gcp-mentions
+spec:
+  selector:
+    matchLabels:
+      app: radio-monitor
+      component: gcp-mentions
+  template:
+    metadata:
+      labels:
+        app: radio-monitor
+        component: gcp-mentions
+    spec:
+      serviceAccountName: radio-monitor-gcp
+      containers:
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.28.1
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=${PROJECT_ID}:australia-southeast1:radio-monitor-db=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 1000m
+            memory: 1024Mi
+      - name: gcp-mentions-analyser
+        image: gcr.io/${PROJECT_ID}/radio-monitor:latest
+        env:
+        - name: POSTGRESQL_HOST
+          value: localhost
+        - name: POSTGRESQL_DATABASE
+          value: radiomonitor
+        - name: POSTGRESQL_USERNAME
+          value: postgres
+        - name: POSTGRESQL_PASSWORD
+          value: zgKmM7wZCy!xqSdNy3
+        - name: TRANSCRIPT_DIRECTORY
+          value: /mnt/rm-nfs/transcripts
+        args:
+        - analyse-mentions
+        - gcp
+        - --input=fs
+        - --output=postgres
+        - --sources=3LO:ffmpeg:gcp,3LO:ffmpeg:opensource
+        resources:
+          requests:
+            cpu: 100m
+            memory: 800Mi
+          limits:
+            cpu: 200m
+            # Node mem usage jumps up upon init, as runtime code is parsed. Request memory is nomimal ongoing memory of the container
+            memory: 1000Mi
+        volumeMounts:
+        - name: nfs
+          mountPath: /mnt/rm-nfs
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: radio-monitor-nfs

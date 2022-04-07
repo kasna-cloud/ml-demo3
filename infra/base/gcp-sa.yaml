@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radio-monitor-gcp
+  labels:
+    app: radio-monitor
+    component: gcp
+  annotations:
+    iam.gke.io/gcp-service-account: radio-monitor-gcp-api@${PROJECT_ID}.iam.gserviceaccount.com

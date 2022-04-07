@@ -1,98 +1,55 @@
 # ml-demo3
 
 This repo contains the code for the Kasna/Eliiza Google ML Specialisation, demo 3.
+Code Repo: https://github.com/kasna-cloud/ml-demo3
 
-## Use-Case
+# Use-Case
 
-Example of an ML model using Pre-Trained ML APIs OR AutoML and trained/evaluated using any dataset. If using Pre-Trained ML APIs, the training of the model need not be described. If using AutoML, hyper-parameter tuning and model design/architecture optimization need not be described.
+The City of Melbourne regularly monitors media channels to understand how the general public is responding to marketing campaigns and news related to the City in Melbourne in general. Automatic monitoring of social media and online news is being managed by an existing solution, but the monitoring of broadcast radio, especially talk-back radio, is manual and ad-hoc. 
 
-## Success Criteria
-### Code
-#### Code Repository
-Partners must provide a link to the code repository (e.g., GitHub, GitLab, GCP CSR), which includes a ReadMe file.
+# Solution 
 
-*Evidence* must include an active link to the code repository containing all code that is used in demo # 1. This code must be reviewable/readable by the assessor, and modifiable by the customer. In addition, the repository should contain a ReadMe file with code descriptions and detailed instructions for running model/application.
+## Components 
 
-#### Code origin certification
-Partners must certify to either of these two scenarios: 1) all code is original and developed within the partner organization, or 2) licensed code is used, post-modification.
+Eliiza (Mantel Group) has developed a solution for The City of Melbourne to automatically monitor broadcast radio. This solution provides summary reports of most discussed daily and weekly topics across the various talk-back channels as well as the sentiment associated with each topic scored from -1 (negative) through to 1 (positive) with neutral sentiment at 0. Additionally, alerts are able to configured to notify the PR function within the City of Melbourne when specific topics are being discussed within a few minutes of them occurring. This provides the organistion with the ability review the audio of what was being discussed and to quickly respond to topics as they are being discussed live on-air. 
 
-*Evidence* must include a certification by the partner organization for either of the above code origin scenarios. In addition, if licensed code is used post-modification, the partner must certify that the code has been modified per license specifications.
+The technical solution makes use of the Google Cloud AI Services, Speech API and Natural Language API. The diagram below shows the overall system architecture. 
 
-### Data
-#### Dataset in GCP
-Partners must provide documentation of where the data of demo #1 is stored within GCP (for access by the ML models during training, testing, and in production).
+![Radio Sentiment Monitoring Architecture](docs/ML-Spesh-Logical.png)
 
-*Evidence* must include the project name and project ID for the Google Cloud Storage bucket or BigQuery dataset with the data (for demo #1).
+### Stream Recorder
+A GKE container runs a capture process to ingest each audio stream from a radio station source and delivers audio in snippets (currently 60 second pieces of audio) into local pod storage 
 
-### Whitepaper/Blog post
-#### Business Goal and ML Solution
-Partners must describe:
-* The business question/goal being addressed.
-* The ML use case.
-* How ML solution is expected to address the business question/goal?
+### Audio Decoder
+The same GKE container monitors for written segments and processes them with the `ffmpeg` audo processing tool. The output of this process then writes the resultant file to a GKE attached GCP Filestore NFS share. 
 
-*Evidence* must include (in the Whitepaper) a top-line description of the business question/goal being addressed in this demo, and how the proposed ML solution will address this business goal.
+The Audio Capture Process makes use of the `ffmpeg` command line tool to be able to capture audio streams and store regular audio snippets in the `.flac` format appropriate for Google Speech API. 
 
-#### Data Exploration
-Partners must describe the following:
-* How and what type of data exploration was performed?
-* What decisions were influenced by data exploration?
+### Transcriber
+Another GKE container monitors files within the NFS share. When a new audio snippet is detected, it is converted to text using the Google Speech-to-text API. The resultant segment transcription is then saved back to the NFS share.
 
-*Evidence* must include a description (in the Whitepaper) of the tools used and the type(s) of data exploration performed, along with code snippets (that accomplish the data exploration).  Additionally, the whitepaper must describe how the data/model algorithm/architecture decisions were influenced by the data exploration.
+### Mentions
+A GKE container scans the NFS share for new transcriptions and response is then passed to the Natural Language API to extract conversation "mentions". These mentions are then stored in the Topic Store along with the timestamp they occurred and the audio channel they were sourced from into a Cloud SQL database table. 
 
-#### Feature Engineering
-Partners must describe the following:
-* What feature engineering was performed?
-* What features were selected for use in the ML model and why?
+### Sentiment
+A GKE container does the same as the "Mentions" container but processes the transcript for speaker sentiment. The results are then processed and written into the Cloud SQL database.
 
-*Evidence* must include a description (in the Whitepaper) of the feature engineering performed (and rationale for the same), what original and engineered features were selected for incorporation as independent predictors in the ML model, and why. Evidence must include code snippets detailing the feature engineering and feature selection steps.
+### Grafana
+A dashboard tool running on Google Kubernetes Engine that is able to provide various flexible data visualisations and alerting on time-series data. In this instance it is being used to display real-time topics being discussed, the top 10 topics, and their associated sentiments, all within a time-window selected by the end-user
 
-#### Preprocessing and the data pipeline
-The partner must describe the data preprocessing pipeline, and how this is accomplished via a package/function that is a callable API (that is ultimately accessed by the served, production model).
+The image below shows the dashboard running live against ABC Radio 3LO from the last 6 hours and refreshing every minute. The list on the right contains the topics in real-time along with their associated sentiment. The list on the left aggregates the topics over the viewed period and shows the top ten. During this particular morning of talk-back radio China and New Zealand were discussed in detail. The graph below gives a simple overall feel that the sentiment of topics is generally more negative than positive (as you would expect of talk-back radio). 
 
-*Evidence* must include a description (in the Whitepaper) of how data preprocessing is accomplished using Dataflow, BigQuery and/or Dataproc, along with the code snippet that accomplishes data preprocessing as a callable API.
+![radio-dashboard.png](docs/radio-dashboard.png)
 
-#### ML Model Desgin(s) and Selection
-Partners must describe the following:
-* Which ML model/algorithm(s) were chosen for demo #1?
-* What criteria were used for ML model selection?
+### Build and Deploy
 
-*Evidence* must describe (in the Whitepaper) selection criteria implemented, as well as the specific ML model algorithms that were selected for training and evaluation purposes. Code snippets detailing the model design and selection steps must be enumerated.
+To install the base infrastructure in a new GCP project, run the following:
+```
+./install
+```
 
-#### ML model training and development
-Partners must document the use of Cloud AI Platform or Kubeflow for ML model training, and describe the following:
-* Dataset sampling used for model training (and for independent dev/test datasets) and justification of sampling methods.
-* Implementation of model training, including adherence to GCP best practices for distribution, device usage, and monitoring.
-* The model evaluation metric that is implemented, and a discussion of why the implemented metric is optimal given the business question/goal being addressed.
-* Hyper-parameter tuning and model performance optimization.
-* How bias/variance were determined (from the train-dev datasets) and tradeoffs used to influence and optimize ML model architecture?
-
-*Evidence* must describe (in the Whitepaper) each of the ML model training and development bullet points (above). In addition, code snippets that accomplish each of these tasks need to be enumerated.
-
-#### ML Model Evaluation
-Partners must describe how the ML model, post-training, and architectural/hyperparameter optimization performs on an independent test dataset.
-
-*Evidence* must include records/data (in the Whitepaper) of how the ML model developed and selected to address the business question performance on an independent test dataset (that reflects the distribution of data that the ML model is expected to encounter in a production environment). In addition, code snippets on model testing need to be enumerated.
-
-### Proof of Deployment
-#### Model application on GCP 
-Partners must provide proof that the ML model/application is deployed and served on GCP with Cloud AI Platform or Kubeflow.
-
-*Evidence* must include the Project Name and Project ID of the deployed cloud machine learning model and client.
-
-#### Callable library/application
-Partners must demonstrate that the ML model for demo #1 is a callable library and/or application.
-
-*Evidence* must include a demonstration of how the served model can be used to make a prediction via an API call.
-
-#### Editable model/application
-Partners must demonstrate that the deployed model is customizable.
-
-*Evidence* must include a demonstration that the deployed model is fully functional after an appropriate code modification, as might be performed by a customer.
-
-
-
-
-
-
+To deploy the GKE python containers to GCP, run the deployment via Cloud Build:
+```
+gcloud builds submit
+```
 
